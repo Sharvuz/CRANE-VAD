@@ -130,29 +130,29 @@ Mở file [`crane_kaggle.ipynb`](crane_kaggle.ipynb) trong Kaggle Notebook. Ch�
 - **Accelerator:** `GPU T4 x2`
 - **Internet:** `On` (khi cài thư viện ban đầu)
 
-### Bước 2: Huấn luyện trên UCF-Crime từ Scratch
+### Bước 2: Huấn luyện trên UCF-Crime từ Scratch (10 Epochs)
 ```bash
 python -u -m src.train_ucf \
     --dataset ucf \
     --batch-size 64 \
-    --epochs 45 \
+    --epochs 10 \
     --lr 1e-4 \
     --lr-proto 5e-4 \
     --n-prototypes 16 \
-    --eval-freq 5 \
+    --eval-freq 1 \
     --model-save-dir models/ucf
 ```
 
-### Bước 3: Huấn luyện trên XD-Violence trên Dual T4 (Batch Size 96)
+### Bước 3: Huấn luyện trên XD-Violence trên Dual T4 (15 Epochs)
 ```bash
 python -u -m src.train_xd \
     --dataset xd \
     --batch-size 96 \
-    --epochs 25 \
+    --epochs 15 \
     --lr 1e-4 \
     --lr-proto 5e-4 \
     --n-prototypes 16 \
-    --eval-freq 5 \
+    --eval-freq 1 \
     --model-save-dir models/xd
 ```
 

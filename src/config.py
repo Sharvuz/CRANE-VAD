@@ -41,11 +41,11 @@ def get_parser(dataset="ucf"):
 
     # Training parameters
     parser.add_argument("--batch-size", default=64 if dataset == "ucf" else 96, type=int, help="Batch size (total)")
-    parser.add_argument("--epochs", default=50 if dataset == "ucf" else 30, type=int, help="Total training epochs")
+    parser.add_argument("--epochs", default=10 if dataset == "ucf" else 15, type=int, help="Total training epochs (WS-VAD standard: 10-15)")
     parser.add_argument("--lr", default=1e-4, type=float, help="Base learning rate for backbone and heads")
     parser.add_argument("--lr-proto", default=5e-4, type=float, help="Learning rate for normal prototype bank")
     parser.add_argument("--weight-decay", default=1e-4, type=float, help="Weight decay")
-    parser.add_argument("--eval-freq", default=5, type=int, help="Evaluation frequency in epochs")
+    parser.add_argument("--eval-freq", default=1, type=int, help="Evaluation frequency in epochs (evaluate every epoch)")
     parser.add_argument("--seed", default=42, type=int, help="Random seed")
     parser.add_argument("--num-workers", default=0, type=int, help="DataLoader num workers")
     parser.add_argument("--device", default="cuda", type=str, help="Device to run on (cuda or cpu)")
