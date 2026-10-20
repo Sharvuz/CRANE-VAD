@@ -60,6 +60,7 @@ def evaluate_ucf(model, test_loader, device, gt_path=None):
 def main():
     parser = get_parser(dataset="ucf")
     parser.add_argument("--checkpoint", default="models/ucf/crane_ucf_best.pth", type=str)
+    parser.add_argument("--model-path", dest="checkpoint", type=str, help="Alias for --checkpoint")
     args = parser.parse_args()
 
     device = torch.device("cuda" if torch.cuda.is_available() and args.device == "cuda" else "cpu")

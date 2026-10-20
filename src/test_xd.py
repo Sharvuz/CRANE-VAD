@@ -57,6 +57,7 @@ def evaluate_xd(model, test_loader, device, gt_path=None):
 def main():
     parser = get_parser(dataset="xd")
     parser.add_argument("--checkpoint", default="models/xd/crane_xd_best.pth", type=str)
+    parser.add_argument("--model-path", dest="checkpoint", type=str, help="Alias for --checkpoint")
     args = parser.parse_args()
 
     device = torch.device("cuda" if torch.cuda.is_available() and args.device == "cuda" else "cpu")
