@@ -327,12 +327,13 @@ class EvidentialGate(nn.Module):
 
         S_final = w_det * mu_det + w_rec * mu_rec + w_sem * mu_sem
 
-        weights = {
-            "w_det": w_det.mean().item(),
-            "w_rec": w_rec.mean().item(),
-            "w_sem": w_sem.mean().item(),
-        }
-        return S_final, weights
+        # Return gate_weights as a Tensor of shape (B, 3) to be fully DataParallel-gather compatible
+        w_det_m = w_det.mean(dim=-1, keepdim=True)
+        w_rec_m = w_rec.mean(dim=-1, keepdim=True)
+        w_sem_m = w_sem.mean(dim=-1, keepdim=True)
+        gate_weights = torch.cat([w_det_m, w_rec_m, w_sem_m], dim=-1)
+
+        return S_final, gate_weights
 
 
 # =========================================================================
@@ -415,6 +416,12 @@ class CRANE_VAD(nn.Module):
             "R": R,
             "logits_sem": logits_sem,
             "gate_weights": gate_weights,
+            "alpha_det": alpha_d,
+            "beta_det": beta_d,
+            "alpha_rec": alpha_r,
+            "beta_rec": beta_r,
+            "alpha_sem": alpha_s,
+            "beta_sem": beta_s,
             "beta_params": {
                 "det": (alpha_d, beta_d),
                 "rec": (alpha_r, beta_r),

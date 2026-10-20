@@ -170,7 +170,11 @@ def compute_total_loss(model_output, Y, model, args):
     # 6. Evidential uncertainty regularization
     L_evid = torch.tensor(0.0, device=Y.device)
     for branch_name in ["det", "rec", "sem"]:
-        alpha, beta_val = beta_params[branch_name]
+        if "beta_params" in model_output and branch_name in model_output["beta_params"]:
+            alpha, beta_val = model_output["beta_params"][branch_name]
+        else:
+            alpha = model_output[f"alpha_{branch_name}"]
+            beta_val = model_output[f"beta_{branch_name}"]
         mu = alpha / (alpha + beta_val)
         L_evid = L_evid + evidential_reg_loss(alpha, beta_val, mu)
     L_evid = L_evid / 3.0

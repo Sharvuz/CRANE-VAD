@@ -198,13 +198,18 @@ def train():
 
         avg_loss = running_losses["total"] / steps_per_epoch
         gw = output["gate_weights"]
+        if isinstance(gw, torch.Tensor):
+            gw_mean = gw.mean(dim=0).detach().cpu().numpy()
+            gw_str = f"Det: {gw_mean[0]:.2f}, Rec: {gw_mean[1]:.2f}, Sem: {gw_mean[2]:.2f}"
+        else:
+            gw_str = f"Det: {gw['w_det']:.2f}, Rec: {gw['w_rec']:.2f}, Sem: {gw['w_sem']:.2f}"
 
         print(
             f"Epoch [{epoch:02d}/{args.epochs:02d}] ({epoch_time:.1f}s) | "
             f"Loss: {avg_loss:.4f} (MIL: {running_losses['mil']/steps_per_epoch:.3f}, "
             f"Comp: {running_losses['compact']/steps_per_epoch:.3f}, "
             f"Sem: {running_losses['sem']/steps_per_epoch:.3f}) | "
-            f"Gate: [Det: {gw['w_det']:.2f}, Rec: {gw['w_rec']:.2f}, Sem: {gw['w_sem']:.2f}]",
+            f"Gate: [{gw_str}]",
             flush=True
         )
 
