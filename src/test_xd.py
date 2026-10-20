@@ -10,11 +10,25 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
 
-from .model import CRANE_VAD
-from .dataset import XDDataset
-from .config import get_parser
-from .text_prompts import get_text_embeddings
-from .utils.eval_utils import eval_xd_ap
+# Support both direct script execution and package imports
+_CURR_DIR = os.path.dirname(os.path.abspath(__file__))
+_REPO_DIR = os.path.dirname(_CURR_DIR)
+for _p in [_REPO_DIR, _CURR_DIR]:
+    if _p not in sys.path:
+        sys.path.insert(0, _p)
+
+try:
+    from model import CRANE_VAD
+    from dataset import XDDataset
+    from config import get_parser
+    from text_prompts import get_text_embeddings
+    from utils.eval_utils import eval_xd_ap
+except ImportError:
+    from src.model import CRANE_VAD
+    from src.dataset import XDDataset
+    from src.config import get_parser
+    from src.text_prompts import get_text_embeddings
+    from src.utils.eval_utils import eval_xd_ap
 
 
 def evaluate_xd(model, test_loader, device, gt_path=None):

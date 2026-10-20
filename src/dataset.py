@@ -5,13 +5,24 @@ and uniform snippet sampling.
 """
 
 import os
+import sys
 from pathlib import Path
 import numpy as np
 import pandas as pd
 import torch
 from torch.utils.data import Dataset
 
-from .utils.tools import process_feat, process_split
+# Support both direct script execution and package imports
+_CURR_DIR = os.path.dirname(os.path.abspath(__file__))
+_REPO_DIR = os.path.dirname(_CURR_DIR)
+for _p in [_REPO_DIR, _CURR_DIR]:
+    if _p not in sys.path:
+        sys.path.insert(0, _p)
+
+try:
+    from utils.tools import process_feat, process_split
+except ImportError:
+    from src.utils.tools import process_feat, process_split
 
 _PATH_CACHE = {}
 

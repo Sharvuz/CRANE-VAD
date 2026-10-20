@@ -14,12 +14,27 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 from sklearn.cluster import KMeans
 
-from .model import CRANE_VAD
-from .losses import compute_total_loss
-from .dataset import XDDataset
-from .config import get_parser
-from .text_prompts import get_text_embeddings
-from .test_xd import evaluate_xd
+# Support both direct script execution and package imports
+_CURR_DIR = os.path.dirname(os.path.abspath(__file__))
+_REPO_DIR = os.path.dirname(_CURR_DIR)
+for _p in [_REPO_DIR, _CURR_DIR]:
+    if _p not in sys.path:
+        sys.path.insert(0, _p)
+
+try:
+    from model import CRANE_VAD
+    from losses import compute_total_loss
+    from dataset import XDDataset
+    from config import get_parser
+    from text_prompts import get_text_embeddings
+    from test_xd import evaluate_xd
+except ImportError:
+    from src.model import CRANE_VAD
+    from src.losses import compute_total_loss
+    from src.dataset import XDDataset
+    from src.config import get_parser
+    from src.text_prompts import get_text_embeddings
+    from src.test_xd import evaluate_xd
 
 
 def set_seed(seed: int = 42):
@@ -36,8 +51,9 @@ def set_seed(seed: int = 42):
 def init_prototypes_kmeans(model, normal_loader, device, n_prototypes=16):
     """
     K-Means initialization on normal features for XD-Violence.
+    Falls back gracefully to random normal samples if KMeans fails.
     """
-    print(f"  [Init] Gathering normal snippet features for K-Means initialization (K={n_prototypes})...", flush=True)
+    print(f"  [Init] Gathering normal snippet features for prototype initialization (K={n_prototypes})...", flush=True)
     features_list = []
     max_samples = 50000
 
@@ -50,11 +66,17 @@ def init_prototypes_kmeans(model, normal_loader, device, n_prototypes=16):
                 break
 
     all_features = np.concatenate(features_list, axis=0)
-    print(f"  [Init] Running K-Means on {len(all_features)} normal snippets...", flush=True)
-    kmeans = KMeans(n_clusters=n_prototypes, random_state=42, n_init=5)
-    kmeans.fit(all_features)
 
-    init_centers = torch.tensor(kmeans.cluster_centers_, dtype=torch.float32)
+    try:
+        from sklearn.cluster import KMeans
+        print(f"  [Init] Running K-Means on {len(all_features)} normal snippets...", flush=True)
+        kmeans = KMeans(n_clusters=n_prototypes, random_state=42, n_init=5)
+        kmeans.fit(all_features)
+        init_centers = torch.tensor(kmeans.cluster_centers_, dtype=torch.float32)
+    except Exception as e:
+        print(f"  [Notice] K-Means initialization skipped ({e}). Sampling random normal snippets directly...", flush=True)
+        indices = np.random.choice(len(all_features), n_prototypes, replace=False)
+        init_centers = torch.tensor(all_features[indices], dtype=torch.float32)
 
     raw_model = model.module if hasattr(model, "module") else model
     raw_model.lgam.prototypes.data.copy_(init_centers)
